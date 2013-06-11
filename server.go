@@ -30,5 +30,5 @@ func object(w http.ResponseWriter, r *http.Request) {
 
 func hello(w http.ResponseWriter, r *http.Request) {
   fmt.Println(r.Method, r.URL, r.Proto)
-  fmt.Fprintf(w, "<h1>Hello, world</h1><br/><img src='http://golang.org/doc/gopher/frontpage.png'>")
+  fmt.Fprintf(w, "<h1>Hello, world</h1><br/><img src='http://golang.org/doc/gopher/frontpage.png'><img src='http://golang.org/doc/gopher/frontpage.png'>")
 }
