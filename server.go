@@ -16,13 +16,21 @@ func main() {
 func object(w http.ResponseWriter, r *http.Request) {
   fmt.Println(r.Method, r.URL, r.Proto)
 
-  type Obj struct {
-    Text string
-    Centstatus int
-    Id string
-    Level int
+  type Object struct {
+    Text string `json:"text"`
+    Centstatus int `json:"centstatu"`
+    Id string `json:"id"`
+    Level int `json:"level"`
   }
-  m := Obj{"Подмостки (д)", 1, "j7d39dc2-cd93-466c-8389-4d6b56f017cb", 6}
+  type Objects []Object
+  m := Objects{}
+  m = append(m, Object{"Подмостки (д)", 1, "j7d39dc2-cd93-466c-8389-4d6b56f017cb", 6})
+  m = append(m, Object{"Подмостки (д)", 1, "j7d39dc2-cd93-466c-8389-4d6b56f017cb", 6})
+  m = append(m, Object{"Подмостки (д)", 1, "j7d39dc2-cd93-466c-8389-4d6b56f017cb", 6})
+  m = append(m, Object{"Подмостки (д)", 1, "j7d39dc2-cd93-466c-8389-4d6b56f017cb", 6})
+  m = append(m, Object{"Подмостки (д)", 1, "j7d39dc2-cd93-466c-8389-4d6b56f017cb", 6})
+  m = append(m, Object{"Подмостки (д)", 1, "j7d39dc2-cd93-466c-8389-4d6b56f017cb", 6})
+  m = append(m, Object{"Подмостки (д)", 1, "j7d39dc2-cd93-466c-8389-4d6b56f017cb", 6})
   b, err := json.Marshal(m)
   if err != nil {log.Fatal(err)}
   fmt.Fprintf(w, "%s", b)
