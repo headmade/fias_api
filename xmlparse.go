@@ -1,14 +1,21 @@
 package main
 
 import (
+  _ "github.com/lib/pq"
+  "github.com/coopernurse/gorp"
+)
+
+import (
+  "database/sql"
+  "log"
   // "bufio"
   "fmt"
   "os"
   "flag"
   "encoding/xml"
-  "strings"
+  // "strings"
   // "regexp"
-  "net/url"
+  // "net/url"
   "math"
 )
 
@@ -52,14 +59,93 @@ type XmlObject struct {
   UPDATEDATE string `xml:"UPDATEDATE,attr"`
 }
 
-func CanonicalizeTitle(title string) string {
-  can := strings.ToLower(title)
-  can = strings.Replace(can, " ", "_", -1)
-  can = url.QueryEscape(can)
-  return can
+type DBObject struct {
+  AOID string `db:"AOID"`
+  AOGUID string `db:"AOGUID"`
+  PARENTGUID string `db:"PARENTGUID"`
+  FORMALNAME string `db:"FORMALNAME"`
+  OFFNAME string `db:"OFFNAME"`
+  SHORTNAME string `db:"SHORTNAME"`
+  AOLEVEL string `db:"AOLEVEL"`
+  REGIONCODE string `db:"REGIONCODE"`
+  AREACODE string `db:"AREACODE"`
+  AUTOCODE string `db:"AUTOCODE"`
+  CITYCODE string `db:"CITYCODE"`
+  CTARCODE string `db:"CTARCODE"`
+  PLACECODE string `db:"PLACECODE"`
+  STREETCODE string `db:"STREETCODE"`
+  EXTRCODE string `db:"EXTRCODE"`
+  SEXTCODE string `db:"SEXTCODE"`
+  PLAINCODE string `db:"PLAINCODE"`
+  CODE string `db:"CODE"`
+  CURRSTATUS string `db:"CURRSTATUS"`
+  ACTSTATUS string `db:"ACTSTATUS"`
+  LIVESTATUS string `db:"LIVESTATUS"`
+  CENTSTATUS string `db:"CENTSTATUS"`
+  OPERSTATUS string `db:"OPERSTATUS"`
+  IFNSFL string `db:"IFNSFL"`
+  IFNSUL string `db:"IFNSUL"`
+  TERRIFNSFL string `db:"TERRIFNSFL"`
+  TERRIFNSUL string `db:"TERRIFNSUL"`
+  OKATO string `db:"OKATO"`
+  OKTMO string `db:"OKTMO"`
+  POSTALCODE string `db:"POSTALCODE"`
+  STARTDATE string `db:"STARTDATE"`
+  ENDDATE string `db:"ENDDATE"`
+  UPDATEDATE string `db:"UPDATEDATE"`
+}
+
+func xml2db(xml XmlObject) *DBObject {
+  obj := &DBObject{
+    AOID: xml.AOID,
+    AOGUID: xml.AOGUID,
+    PARENTGUID: xml.PARENTGUID,
+    FORMALNAME: xml.FORMALNAME,
+    OFFNAME: xml.OFFNAME,
+    SHORTNAME: xml.SHORTNAME,
+    AOLEVEL: xml.AOLEVEL,
+    REGIONCODE: xml.REGIONCODE,
+    AREACODE: xml.AREACODE,
+    AUTOCODE: xml.AUTOCODE,
+    CITYCODE: xml.CITYCODE,
+    CTARCODE: xml.CTARCODE,
+    PLACECODE: xml.PLACECODE,
+    STREETCODE: xml.STREETCODE,
+    EXTRCODE: xml.EXTRCODE,
+    SEXTCODE: xml.SEXTCODE,
+    PLAINCODE: xml.PLAINCODE,
+    CODE: xml.CODE,
+    CURRSTATUS: xml.CURRSTATUS,
+    ACTSTATUS: xml.ACTSTATUS,
+    LIVESTATUS: xml.LIVESTATUS,
+    CENTSTATUS: xml.CENTSTATUS,
+    OPERSTATUS: xml.OPERSTATUS,
+    IFNSFL: xml.IFNSFL,
+    IFNSUL: xml.IFNSUL,
+    TERRIFNSFL: xml.TERRIFNSFL,
+    TERRIFNSUL: xml.TERRIFNSUL,
+    OKATO: xml.OKATO,
+    OKTMO: xml.OKTMO,
+    POSTALCODE: xml.POSTALCODE,
+    STARTDATE: xml.STARTDATE,
+    ENDDATE: xml.ENDDATE,
+    UPDATEDATE: xml.UPDATEDATE }
+  return obj
 }
 
 func main() {
+  db, err := sql.Open("postgres", "user=dev dbname=test_db password=dev")
+
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  dbmap := &gorp.DbMap{Db: db, Dialect: gorp.PostgresDialect{}}
+  dbmap.AddTableWithName(DBObject{}, "objects")
+
+  // dbmap.DropTables()
+  dbmap.CreateTablesIfNotExists()
+
   flag.Parse()
 
   xmlFile, err := os.Open(*inputFile)
@@ -89,11 +175,14 @@ func main() {
         // decode a whole chunk of following XML into the
         // variable p which is a Page (se above)
         decoder.DecodeElement(&p, &se)
+        obj := xml2db(p)
+        // fmt.Println(obj)
+        dbmap.Insert(obj)
         total++;
         if math.Mod(float64(total), 1000) == 0 {
           fmt.Println(total)
         }
-        fmt.Println(p)
+        // fmt.Println(p)
 
         // Do some stuff with the page.
         // p.Title = CanonicalizeTitle(p.Title)
